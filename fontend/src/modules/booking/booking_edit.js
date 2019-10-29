@@ -1,125 +1,273 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import {API_URL} from "../../config/config";
+import DatePicker from "react-datepicker";
+import base64 from "base-64";
+import Auth from "../../components/AuthService";
 import axios from "axios";
-class Useredit extends PureComponent {
+class Bookingedit extends PureComponent {
     static propTypes = {}
 
     constructor(props) {
         super(props)
 
         this.state = {
+            booking:[{"id":"15","date":"1571763600000","time":"1571709300768","type_of_car_id":"3","customer_name":"nhat anh 3","customer_phone":"0352336270","arrival_place_id":"3","departure_place_id":"1","NCC_id":"3","partner_id":"0","place_of_guest":"\u00e1\u0111\u00e2sd","price":"100","proceeds_vnd":"20000","proceeds_usd":"","revenue_vnd":null,"revenue_usd":"","profit":"-9900","note":"1 khach","user_id":"5"}],
             department_list: [],
             user_category_list:[],
-            user: [{"id":"0","first_name":"","last_name":"","email":"","phone":"","address":"","department":"1","user_category":"1","username":""}]
+            type_of_car_list:[],
+            departure_list:[],
+            arrival_list:[],
+            NCC_list:[],
+            partner_list:[],
+            startDate: '1572368400000',
+            time:'1572368400000',
+            flag:false
         }
-        this.handleSubmit = this.handleSubmit.bind(this)
+        this.handleSubmit =  this.handleSubmit.bind(this)
         this.handleChange = this.handleChange.bind(this)
+        this.handleChangeTime = this.handleChangeTime.bind(this)
+        this.handleChangeDate = this.handleChangeDate.bind(this)
+        this.handleChangeChecked = this.handleChangeChecked.bind(this)
+    }
+    handleChangeDate = date => {
+        this.setState({
+          startDate: date.getTime()
+        });
+      };
+    handleChangeTime = time => {
+        this.setState({
+            time: time.getTime()
+        });
+      };
+    handleChange(e){
+
+        this.setState({booking:[{...this.state.booking[0],[e.target.name]:e.target.value}]})
+       
+    }
+    handleChangeChecked(e){
+
+        this.setState({flag:!this.state.flag})
+        
     }
     componentDidMount(){
-        axios.get(API_URL+'/production/department/getAll.php').then((data)=>{
-            if(data){
-                this.setState({department_list:data.data})
-                console.log('data',data.data)
-            }
-            
-        })  
-        axios.get(API_URL+'/production/usercategory/getAll.php').then((data)=>{
-            if(data != undefined || data != null || data.data.typeof === "object"){
-                this.setState({user_category_list:data.data})
-                console.log('data',data)
-            }
-        }) 
         if(this.props.match != undefined){
-            axios.post(API_URL+'/production/user/editUser.php',{
+            axios.post(API_URL+'/production/booking/editBooking.php',{
                 id: this.props.match.params.id}
                 ).then((data)=>{
                 if(data){
-                    this.setState({user:data.data})
+                    this.setState({
+                        booking:data.data,
+                        startDate:data.data[0].date,
+                        time:data.data[0].time,
+                        flag:(data.data[0].flag == '1')?true:false
+
+                    })
                     console.log('data',data.data)
                 }
                 
             })
         }else{
-            this.props.history.replace('/user-management');
+            this.props.history.replace('/table');
         }
-        
-    } 
-    handleChange(e){
-        console.log('target',e.target.name)
-        this.setState({user:[{...this.state.user[0],[e.target.name]:e.target.value}]})
-       
+        // axios.get(API_URL+'/production/department/getAll.php').then((data)=>{
+        //     if(data){
+        //         this.setState({department_list:data.data})
+        //         console.log('data',data.data)
+        //     }
+            
+        // })
+        axios.get(API_URL+'/production/Partner/getAll.php').then((data)=>{
+            if(data){
+                this.setState({partner_list:data.data})
+                console.log('data',data.data)
+            }
+            
+        })    
+        axios.get(API_URL+'/production/usercategory/getAll.php').then((data)=>{
+            if(data != undefined || data != null || data.data.typeof === "object"){
+                this.setState({user_category_list:data.data})
+                console.log('data',data)
+            }
+        })
+        axios.get(API_URL+'/production/Car/getAll.php').then((data)=>{
+            if(data != undefined || data != null || data.data.typeof === "object"){
+                this.setState({type_of_car_list:data.data})
+                console.log('data',data)
+            }
+        })   
+        axios.get(API_URL+'/production/Departure/getAll.php').then((data)=>{
+            if(data != undefined || data != null || data.data.typeof === "object"){
+                this.setState({departure_list:data.data})
+                console.log('data',data)
+            }
+        })
+        axios.get(API_URL+'/production/Arrival/getAll.php').then((data)=>{
+            if(data != undefined || data != null || data.data.typeof === "object"){
+                this.setState({arrival_list:data.data})
+                console.log('data',data)
+            }
+        })  
+        axios.get(API_URL+'/production/NCC/getAll.php').then((data)=>{
+            if(data != undefined || data != null || data.data.typeof === "object"){
+                this.setState({NCC_list:data.data})
+                console.log('data',data)
+            }
+        }) 
     }
     handleSubmit(e){
         e.preventDefault();
-        console.log('e',e.target.password.value)
-        axios.post(API_URL+'/car_booking/production/user/updateUser.php',{
-            id: e.target.id.value,
-            frsname: e.target.first_name.value,
-            lastname: e.target.last_name.value,
-            department: e.target.department.value,
-            address: e.target.address.value,
-            username: e.target.username.value,
-            password: e.target.password.value,
-            user_category: e.target.user_category.value,
-            phone: e.target.phone.value,
-            email: e.target.email.value
+        const auth = new Auth()
+        let token = auth.getToken()
+        let decoded = JSON.parse(base64.decode(auth.getToken()))
+        if(decoded.department== '1'){
+        axios.post(API_URL+'/production/Booking/updateBooking.php',{
+            id: e.target.id.value ,
+            date: this.state.startDate,
+            time: this.state.time,
+            flag:(e.target.updated.checked)?1:0,
+            departure: e.target.departure.value ,
+            partner: e.target.partner.value ,
+            arrival: e.target.arrival.value,
+            pickup_place: e.target.pickup_place.value,
+            place_of_guest: e.target.place_of_guest.value,
+            type_of_car: e.target.type_of_car.value,
+            customer_name: e.target.customer_name.value,
+            customer_phone: e.target.customer_phone.value,
+            price : e.target.price.value,
+            proceeds_vnd: e.target.proceeds_vnd.value,
+            proceeds_usd: e.target.proceeds_usd.value,
+            revenue_vnd: e.target.revenue_vnd.value,
+            revenue_usd: e.target.revenue_usd.value,
+            NCC:e.target.NCC.value,
+            note : e.target.note.value,
+            token:token
           }).then((data)=>{
                 console.log('data',data)
                 if(data.data.message == '1'){
                     alert('successfull')
-                    this.props.history.replace('/user-management');
+                    this.props.history.replace('/table');
                 }else{
                     alert('server error')
                 }
         })
     }
+        //e.preventDefault();
+    }
     render() {
         const department = this.state.department_list.map(row =>{
-            return <option key={row.id} value={row.id} selected={(this.state.user[0].department == row.id)?true:false}>{row.name}</option>
+            return <option value={row.id}>{row.name}</option>
         })
-        const user_category = this.state.user_category_list.map(row =>{
-            return <option key={row.id} value={row.id} selected={(this.state.user[0].user_category == row.id)?true:false}>{row.name}</option>
+        const partner = this.state.partner_list.map(row =>{
+            return <option value={row.id} selected={(this.state.booking[0].partner_id == row.id)?true:false}>{row.name}</option>
+        })
+        const departure = this.state.departure_list.map(row =>{
+            return <option value={row.id}  selected={(this.state.booking[0].departure_place_id == row.id)?true:false}>{row.name}</option>
+        })
+        const type_of_car = this.state.type_of_car_list.map(row =>{
+            return <option value={row.id} selected={(this.state.booking[0].type_of_car_id == row.id)?true:false}>{row.name}</option>
+        })
+        const arrival = this.state.arrival_list.map(row =>{
+            return <option value={row.id} selected={(this.state.booking[0].arrival_place_id == row.id)?true:false}>{row.name}</option>
+        })
+        const NCC = this.state.NCC_list.map(row =>{
+            return <option value={row.id} selected={(this.state.booking[0].NCC_id == row.id)?true:false}>{row.name}</option>
         })
         return (
             <div className="content">
                 <div className="container-fluid">
                     <div className="row justify-content-center">
-                    <div className="col-xs-12 col-sm-8 col-md-8 bg-white">
+                    <div className="col-xs-12 col-sm-12 col-md-12 bg-white">
+                        <form onSubmit={this.handleSubmit}>
                         <div className="panel panel-default">
                             <div className="panel-heading">
-                                    <h3 className="panel-title">Update user information</h3>
+                                    <h3 className="panel-title">Please Enter to update Booking information</h3>
+                                    <div className="form-check">
+                                            <label className="form-check-label">
+                                            <input className="form-check-input" type="checkbox" id="updated" name="updated" value="1" onChange={this.handleChangeChecked} checked={this.state.flag}/>
+                                            <span className="form-check-sign">
+                                                <span className="check"></span>
+                                            </span>Checked
+                                            </label>
+                                        </div>
                                     </div>
                                     <div className="panel-body">
-                                    <form role="form" onSubmit={this.handleSubmit}>
-                                    <div className="form-group">
-                                            <input type="text" name="id" id="id" className="form-control input-sm " style={{display:'none'}} onChange={this.handleChange} value={this.state.user[0].id} placeholder="id"/>
-                                    </div>
-                                    <div className="row">
+                                        <div className="form-group">
+                                                <input type="text" name="id" id="id" className="form-control input-sm " style={{display:'none'}} onChange={this.handleChange} value={this.state.booking[0].id} placeholder="id"/>
+                                        </div>
+                                        <div className="row">
                                             <div className="col-xs-6 col-sm-6 col-md-6">
-                                                <div className="form-group">
-                                                    <input type="text" name="first_name" id="first_name" className="form-control input-sm" onChange={this.handleChange} value={this.state.user[0].first_name} placeholder="First Name"/>
+                                                <div class="form-group row">
+                                                    <label for="colFormLabel" class="col-sm-2 col-form-label col-form-label-sm">Car Type</label>
+                                                    <div class="col-sm-10">
+                                                        <DatePicker
+                                                            selected={new Date(parseInt(this.state.startDate))}
+                                                            onChange={this.handleChangeDate}
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div className="col-xs-6 col-sm-6 col-md-6">
-                                                <div className="form-group">
-                                                    <input type="text" name="last_name" id="last_name" className="form-control input-sm" onChange={this.handleChange} value={this.state.user[0].last_name} placeholder="Last Name"/>
+                                                <div className="col-xs-6 col-sm-6 col-md-6">
+                                                    <div class="form-group row">
+                                                        <label for="colFormLabel" class="col-sm-3 col-form-label col-form-label-sm">time</label>
+                                                        <div class="col-sm-9">
+                                                            <DatePicker
+                                                                selected={new Date(parseInt(this.state.time))}
+                                                                onChange={this.handleChangeTime}
+                                                                showTimeSelect
+                                                                showTimeSelectOnly
+                                                                timeIntervals={5}
+                                                                timeCaption="Time"
+                                                                dateFormat="h:mm aa"
+                                                            />
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="row">
-                                            <div className="col-xs-6 col-sm-6 col-md-6">
-                                                <div className="form-group">
-                                                    <input type="email" name="email" id="email" className="form-control input-sm" onChange={this.handleChange} value={this.state.user[0].email} placeholder="Email Address"/>
-                                                </div>
-                                            </div>
-                                            <div className="col-xs-6 col-sm-6 col-md-6">
-                                            <div className="form-group row">
-                                                    <label className="col-sm-4 col-form-label col-form-label-sm">Department</label>
-                                                    <div className="col-sm-8">
-                                                        <select className="form-control" name="department" id="department" required>
+                                            <div className="col-xs-4 col-sm-4 col-md-4">
+                                                <div class="form-group row">
+                                                    <label for="colFormLabel" class="col-sm-4 col-form-label col-form-label-sm">Car Type</label>
+                                                    <div class="col-sm-8">
+                                                        <select className="form-control" name="type_of_car" id="type_of_car"  required>
                                                             <option value="0" disabled selected>Select </option>
-                                                            {department}
+                                                            {type_of_car}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="col-xs-4 col-sm-4 col-md-4">
+                                                <div className="form-group">
+                                                    <input type="text" name="customer_name" id="customer_name" className="form-control input-sm" onChange={this.handleChange} value={this.state.booking[0].customer_name} placeholder="Customer Name"/>
+                                                </div>
+                                            </div>
+                                            <div className="col-xs-4 col-sm-4 col-md-4">
+                                                <div className="form-group">
+                                                    <input type="text" name="customer_phone" id="customer_phone" className="form-control input-sm" onChange={this.handleChange} value={this.state.booking[0].customer_phone} placeholder="Customer Phone"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="row">
+                                            <div className="col-xs-6 col-sm-6 col-md-6">
+                                                <div class="form-group row">
+                                                    <label for="colFormLabel" class="col-sm-4 col-form-label col-form-label-sm">Departure Place</label>
+                                                    <div class="col-sm-8">
+                                                        <select className="form-control" name="departure" id="departure" required>
+                                                            <option value="0" disabled selected>Select </option>
+                                                            {departure}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="col-xs-6 col-sm-6 col-md-6">
+                                                <div class="form-group row">
+                                                    <label for="colFormLabel" class="col-sm-4 col-form-label col-form-label-sm">Arrival Place</label>
+                                                    <div class="col-sm-8">
+                                                        <select className="form-control" name="arrival" id="arrival" required>
+                                                            <option value="0" disabled selected>Select </option>
+                                                            {arrival}
                                                         </select>
                                                     </div>
                                                 </div>
@@ -128,48 +276,86 @@ class Useredit extends PureComponent {
                                         <div className="row">
                                             <div className="col-xs-6 col-sm-6 col-md-6">
                                                 <div className="form-group">
-                                                    <input type="text" name="phone" id="phone" className="form-control input-sm" onChange={this.handleChange} value={this.state.user[0].phone} placeholder="Phone"/>
+                                                    <input type="text" name="pickup_place" id="pickup_place" className="form-control input-sm" onChange={this.handleChange} value={this.state.booking[0].pickup_place} placeholder="Pickup Place"/>
                                                 </div>
                                             </div>
                                             <div className="col-xs-6 col-sm-6 col-md-6">
-                                                <div className="form-group row">
-                                                    <label className="col-sm-4 col-form-label col-form-label-sm">User Role</label>
-                                                    <div className="col-sm-8">
-                                                        <select className="form-control" name="user_category" id="user_category" required>
-                                                            <option value="0" disabled selected>Select</option>
-                                                            {user_category}
+                                                <div className="form-group">
+                                                    <input type="text" name="place_of_guest" id="place_of_guest" className="form-control input-sm" onChange={this.handleChange} value={this.state.booking[0].place_of_guest} placeholder="Place Of Guest"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="row">
+                                            <div className="col-xs-12 col-sm-12 col-md-12">
+                                                <div class="form-group row">
+                                                    <label for="colFormLabel" class="col-sm-2 col-form-label col-form-label-sm">Supplier</label>
+                                                    <div class="col-sm-10">
+                                                        <select className="form-control" name="NCC" id="NCC" required>
+                                                            <option value="0" disabled selected>Select </option>
+                                                            {NCC}
                                                         </select>
                                                     </div>
                                                 </div>
                                             </div>
+                                            
                                         </div>
-                                        <div className="form-group">
-                                            <input type="text" name="address" id="address" className="form-control input-sm" onChange={this.handleChange}  value={this.state.user[0].address} placeholder="Address"/>
+                                        <div className="row">
+                                            <div className="col-xs-12 col-sm-12 col-md-12">
+                                                <div class="form-group row">
+                                                    <label for="colFormLabel" class="col-sm-2 col-form-label col-form-label-sm">Partner</label>
+                                                    <div class="col-sm-10">
+                                                        <select className="form-control" name="partner" id="partner" required>
+                                                            <option value="0" disabled selected>Select </option>
+                                                            {partner}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
                                         </div>
-                                        <div className="form-group">
-                                            <input type="text" name="username" id="username" className="form-control input-sm"  value={this.state.user[0].username} disabled placeholder="Username"/>
-                                        </div>
-                                        <div className="form-group">
-                                            <label className="text-danger"> Don't Enter Password if you don't want to change (*)</label>
+                                        <div className="row">
+                                            <div className="col-xs-12 col-sm-12 col-md-12">
+                                                <div className="form-group">
+                                                    <input type="text" name="price" id="price" className="form-control input-sm" onChange={this.handleChange} value={this.state.booking[0].price} placeholder="Price"/>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className="row">
                                             <div className="col-xs-6 col-sm-6 col-md-6">
                                                 <div className="form-group">
-                                                    <input type="password" name="password" id="password" className="form-control input-sm" placeholder="Password"/>
+                                                    <input type="text" name="proceeds_vnd" id="proceeds_vnd" className="form-control input-sm" onChange={this.handleChange} value={this.state.booking[0].proceeds_vnd} placeholder="proceeds(vnd)"/>
                                                 </div>
                                             </div>
                                             <div className="col-xs-6 col-sm-6 col-md-6">
                                                 <div className="form-group">
-                                                    <input type="password" name="password_confirmation" id="password_confirmation" className="form-control input-sm" placeholder="Confirm Password"/>
+                                                    <input type="text" name="proceeds_usd" id="proceeds_usd" className="form-control input-sm" onChange={this.handleChange} value={this.state.booking[0].proceeds_usd} placeholder="proceeds(USD)"/>
                                                 </div>
                                             </div>
                                         </div>
-                                        
-                                        <input type="submit" value="Register" className="btn btn-info btn-block"/>
+                                        <div className="row">
+                                            <div className="col-xs-6 col-sm-6 col-md-6">
+                                                <div className="form-group">
+                                                    <input type="text" name="revenue_vnd" id="revenue_vnd" className="form-control input-sm" onChange={this.handleChange} value={this.state.booking[0].revenue_vnd} placeholder="revenue(vnd)"/>
+                                                </div>
+                                            </div>
+                                            <div className="col-xs-6 col-sm-6 col-md-6">
+                                                <div className="form-group">
+                                                    <input type="text" name="revenue_usd" id="revenue_usd" className="form-control input-sm" onChange={this.handleChange} value={this.state.booking[0].revenue_usd} placeholder="revenue(USD)"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="row">
+                                            <div className="col-xs-12 col-sm-12 col-md-12">
+                                                <div className="form-group">
+                                                    <textarea className="form-control input-sm"  rows="5" name="note" id="note" onChange={this.handleChange} value={this.state.booking[0].note} placeholder="Note"/>
+                                                </div>
+                                            </div>
+                                        </div>   
+                                        <input type="submit" value="Update" className="btn btn-info btn-block"/>
                                     
-                                    </form>
                                 </div>
                             </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -178,4 +364,4 @@ class Useredit extends PureComponent {
     }
 }
 
-export default Useredit
+export default Bookingedit

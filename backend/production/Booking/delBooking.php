@@ -10,12 +10,12 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 include_once '../../database.php';
  
 // instantiate product object
-include_once './carModel.php';
+include_once './bookingModel.php';
  
 $database = new Database();
 $db = $database->getConnection();
  
-$Car = new Car($db);
+$Booking = new Booking($db);
 $data = json_decode(file_get_contents("php://input"));
 
 if(!empty($data->id)){
@@ -23,8 +23,8 @@ if(!empty($data->id)){
     $decoded = json_decode(base64_decode($data->token));
     //echo(empty($decoded->token));die;
     if(isset($decoded->token) && !empty($decoded->token)){
-        //echo($Car->del($data->id));die;
-        if($Car->del($data->id)){
+        //echo($Booking->del($data->id));die;
+        if($Booking->del($data->id)){
             echo json_encode(array("message" => '1'));
         }else{
             echo json_encode(array("message" => '0'));

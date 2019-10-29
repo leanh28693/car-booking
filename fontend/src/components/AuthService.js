@@ -1,6 +1,9 @@
 import base64 from 'base-64';
 import jwt from 'jwt-decode';
 import axios from "axios";
+import Cookies from 'universal-cookie';
+import { cookie_time } from "../config/config";
+const cookie =  new Cookies()
 //import request from "request";
 export default class AuthService {
     // Initializing important variables
@@ -10,9 +13,11 @@ export default class AuthService {
         this.login = this.login.bind(this)
         this.getProfile = this.getProfile.bind(this)
         this.setToken = this.setToken.bind(this)
+        
     }
 
     login(username, password) {
+        console.log('login')
         // Get a token from api server using the fetch api
         return this.fetch(username, password).then(res => {
             console.log('res',res)
@@ -33,13 +38,15 @@ export default class AuthService {
     isTokenExpired(token) {
         //console.log(decode())
         try {
-            const decoded = base64.decode(token);
-            const token_decoded = jwt(JSON.parse(decoded).token) 
-            console.log('exp',token_decoded)
-            if (token_decoded.exp > 1000) { // Checking if token is expired. N
-                return true;
-            }
-            else
+            if(token != ''){
+                const decoded = base64.decode(token);
+                const token_decoded = jwt(JSON.parse(decoded).token) 
+                if (token_decoded.exp > 1000) { // Checking if token is expired. N
+                    return true;
+                }
+                else
+                    return false;
+            }else
                 return false;
         }
         catch (err) {
@@ -49,18 +56,32 @@ export default class AuthService {
     }
 
     setToken(idToken) {
-        // Saves user token to localStorage
-        console.log('idToken',idToken)
+
+        cookie.set('token', idToken, {maxAge :cookie_time});
         localStorage.setItem('id_token', idToken)
     }
 
     getToken() {
         // Retrieves the user token from localStorage
-        return localStorage.getItem('id_token')
+        let token = localStorage.getItem('id_token')
+        if(token == null)
+        
+            return ''
+        return token    
     }
-
+    getCookie() {
+        // Retrieves the user token from localStorage
+        let token = cookie.get('token')
+        if(token == null){
+            this.logout()
+            return false
+        }
+            
+        return true    
+    }
     logout() {
         // Clear user token and profile data from localStorage
+        cookie.remove('token');
         localStorage.removeItem('id_token');
     }
 
@@ -71,6 +92,7 @@ export default class AuthService {
 
 
     fetch(username,password) {
+        console.log('fetch')
         return axios.post(`${this.domain}/production/login.php`,{
             username: username,
             password: password,

@@ -34,6 +34,7 @@ if($num>0){
         extract($row);
         $Booking_item = array(
             "id" => $id,
+            "flag" => $flag,
             "date" => $date,
             "time" => $time,
             "type_of_car" => $type_of_car,

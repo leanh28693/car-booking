@@ -10,23 +10,23 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 include_once '../../database.php';
  
 // instantiate product object
-include_once './carModel.php';
+include_once './bookingModel.php';
  
 $database = new Database();
 $db = $database->getConnection();
  
-$Car = new Car($db);
+$Booking = new Booking($db);
 $data = json_decode(file_get_contents("php://input"));
 
 if(!empty($data->id)){
     // query products
-    $stmt = $Car->getOneByID($data->id);
+    $stmt = $Booking->getOneByID($data->id);
     $num = $stmt->rowCount();
     // check if more than 0 record found
     if($num>0){
         // products array
-        $Car_arr=array();
-        $Car_arr["records"]=array();
+        $Booking_arr=array();
+        $Booking_arr["records"]=array();
         // retrieve our table contents
         // fetch() is faster than fetchAll()
         // http://stackoverflow.com/questions/2770630/pdofetchall-vs-pdofetch-in-a-loop
@@ -35,22 +35,44 @@ if(!empty($data->id)){
             // this will make $row['name'] to
             // just $name only
             extract($row);
-            $Car_item = array(
+            $Booking_item = array(
                 "id" => $id,
-                "name" => $name,
-                "description" => $description,
-                "supplier" => $supplier
+                "flag" => $flag,
+                "date" => $date,
+                "time" => $time,
+                "type_of_car_id" => $type_of_car_id,
+                "customer_name" => $customer_name,
+                "customer_phone" => $customer_phone,
+                "arrival_place_id" => $arrival_place_id,
+                "departure_place_id" => $departure_place_id,
+                "NCC_id" => $NCC_id,
+                "partner_id" => $partner_id,
+                "pickup_place" => $pickup_place,
+                "place_of_guest" => $place_of_guest,
+                "price" => $price,
+                "proceeds_vnd" => $proceeds_vnd,
+                "proceeds_usd" => $proceeds_usd,
+                "revenue_vnd" => $revenue_vnd,
+                "revenue_usd" => $revenue_usd,
+                "profit" => $profit,
+                "note" => $note,
+                "user_id" => $user_id,
+                "partner" => $partner
+
             );
-            array_push($Car_arr["records"], $Car_item);
+            array_push($Booking_arr["records"], $Booking_item);
         }
         // set response code - 200 OK
         http_response_code(200);
         // show products data in json format
-        echo json_encode($Car_arr["records"]);
+        echo json_encode($Booking_arr["records"]);
     }else{
         http_response_code(404);
         echo json_encode(array("message" => 0));
     }
+}else{
+    http_response_code(404);
+    echo json_encode(array("message" => 0));
 }
 
 ?>

@@ -13,7 +13,8 @@ class User_profile extends PureComponent {
         this.state = {
             user : {
               address: "test",
-              department: "1",
+              department: "0",
+              user_category:"0",
               email: "leanh@gmail.com",
               firstname: "anh",
               id: "1",
@@ -22,8 +23,8 @@ class User_profile extends PureComponent {
               token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjIwMDB9.x2bH1f9ZpeFd-NDx8kimtHXiQ1b4WqkjBpuhQbhCel8",
               username: "admin",
             },
-            department_list: [],
-            user_category_list:[]
+            department_list: [{id: "0", name: "", description: "", date_create: "2019-10-11 19:25:06"}],
+            user_category_list:[{id: "0", name: "", description: "", date_create: "2019-10-11 19:25:06"}]
         }
     }
     componentDidMount(){
@@ -38,14 +39,29 @@ class User_profile extends PureComponent {
         }
         
     })
+    axios.get(API_URL+'/production/usercategory/getAll.php').then((data)=>{
+      if(data != undefined || data != null || data.data.typeof === "object"){
+          this.setState({user_category_list:data.data})
+          console.log('data',data)
+      }
+    }) 
       let auth = new Auth()
       this.setState({user:JSON.parse(base64.decode(auth.getToken()))})
     }
+    getName = (array,value) => {
+      let result = null
+
+       array.map(row2=>{
+        if(value === row2.id){
+          result = row2.name
+        }
+    })
+    return result
+    
+    }
     render() {
-        let department = (this.state.department_list != [])?this.state.department_list.map(row2=>{
-          if(this.state.user.department === row2.id)
-              return row2.name
-      }):""
+      let department = this.getName(this.state.department_list,this.state.user.department)
+      let user_category =  this.getName(this.state.user_category_list,this.state.user.user_category)
         return (
             <div className="content">
                     <div className="container-fluid">
@@ -104,28 +120,18 @@ class User_profile extends PureComponent {
                                   <div className="col-md-6">
                                     <div className="form-group">
                                       <label className="bmd-label-floating">Department</label>
-                                      <input type="text" className="form-control" value={department} disabled/>
+                                      <input type="text" className="form-control" value={department} disabled />
                                     </div>
                                   </div>
                                   <div className="col-md-6">
                                     <div className="form-group">
                                       <label className="bmd-label-floating">User Role</label>
-                                      <input type="text" className="form-control" value={department} disabled/>
+                                      <input type="text" className="form-control" value={user_category} disabled />
                                     </div>
                                   </div>
                                   
                                 </div>
-                                <div className="row">
-                                  <div className="col-md-12">
-                                    <div className="form-group">
-                                      <label>About Me</label>
-                                      <div className="form-group">
-                                        <label className="bmd-label-floating"> Lamborghini Mercy, Your chick she so thirsty, I'm in that two seat Lambo.</label>
-                                        <textarea className="form-control" rows="5"></textarea>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
+                                
                                 <Link  to={"/user-edit/"+this.state.user.id}>
                                   <button type="submit" className="btn btn-primary pull-right">Update Profile</button>
                                 </Link>
@@ -142,12 +148,11 @@ class User_profile extends PureComponent {
                               </a>
                             </div>
                             <div className="card-body">
-                              <h6 className="card-category text-gray">CEO / Co-Founder</h6>
-                              <h4 className="card-title">Alec Thompson</h4>
+                              <h6 className="card-category text-gray"></h6>
+                              <h4 className="card-title">{this.state.user.firstname+ ' '+this.state.user.lastname}</h4>
                               <p className="card-description">
-                                Don't be scared of the truth because we need to restart the human foundation in truth And I love you like Kanye loves Kanye I love Rick Owens’ bed design but the back is...
+                              {department}
                               </p>
-                              <a href="#pablo" className="btn btn-primary btn-round">Follow</a>
                             </div>
                           </div>
                         </div>

@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Link, Redirect } from "react-router-dom";
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import Bg from "./assets/img/sidebar-1.jpg";
 import Auth from "./components/AuthService";
+import base64 from "base-64";
 const auth = new Auth()
 class Main extends Component {
     static propTypes = {}
@@ -13,7 +14,16 @@ class Main extends Component {
 
         this.state = {
             selected:"dashboard",
-            dropdownOpen: false
+            dropdownOpen: false,
+            menu_list:[
+                {link:"/dashboard",name:"dashboard",Icon:"dashboard",user_role:[1]},
+                {link:"/",name:"User Profile",Icon:"person",user_role:[1,2,3]},
+                {link:"/user-management",name:"User Management",Icon:"person",user_role:[1]},
+                {link:"/admin-control",name:"Admin control",Icon:"person",user_role:[1,2]},
+                {link:"/table",name:"Booking",Icon:"content_paste",user_role:[1,2,3]},
+                {link:"/statistics",name:"Statistics",Icon:"content_paste",user_role:[1,2,3]}
+            ],
+            decoded:{"id":"0","username":"0","email":"0","firstname":"0","lastname":"0","address":"0","phone":"0","department":"0","user_category":0,"token":"0"}
         }
         // this.setFilter =  this.setFilter.bind(this)
         this.isActive =  this.isActive.bind(this)
@@ -33,9 +43,21 @@ class Main extends Component {
         console.log('isActive')
         return ((value===this.props.rest.path) ?'active':'');
     }
+    componentDidMount(){
+        this.setState({decoded: JSON.parse(base64.decode(auth.getToken()))})
+    }
     
-
     render() {
+
+        let link = this.state.menu_list.map((row,index) =>{
+            return  (row.user_role.indexOf(parseInt(this.state.decoded.user_category)) !== -1 )? 
+                                        <li key={index} className={"nav-item "+ this.isActive(row.link)}>
+                                            <Link className="nav-link" to={row.link}>
+                                            <i className="material-icons">{row.Icon}</i>
+                                            <p>{row.name}</p>
+                                            </Link>
+                                        </li>:''
+        })
         return (
             <div>
             <div className="wrapper">
@@ -47,7 +69,8 @@ class Main extends Component {
                 </div>
                   <div className="sidebar-wrapper">
                       <ul className="nav">
-                      <li className={"nav-item "+ this.isActive('/')}>
+                          {link}
+                      {/* <li className={"nav-item "+ this.isActive('/')}>
                           <Link className="nav-link" to="/">
                             <i className="material-icons">dashboard</i>
                             <p>Dashboard</p>
@@ -88,7 +111,7 @@ class Main extends Component {
                           <i className="material-icons">content_paste</i>
                           <p>CMS</p>
                           </Link>
-                      </li>
+                      </li> */}
                       
                       </ul>
                   </div>

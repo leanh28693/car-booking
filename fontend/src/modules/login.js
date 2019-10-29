@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import Auths from "../components/AuthService";
+
 import { withRouter } from 'react-router';
 class Login extends Component {
     static propTypes = {}
@@ -24,6 +25,7 @@ class Login extends Component {
         this.handleChange =  this.handleChange.bind(this)
     }
     handleSubmit(e){
+        console.log('submit')
         e.preventDefault();
         this.Auth.login(this.state.username,this.state.password)
             .then(res =>{

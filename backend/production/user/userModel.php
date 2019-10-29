@@ -55,6 +55,7 @@ function readOne($username){
     
     // get retrieved row
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    //var_dump($row);die;
     return $row;
 }
 function getOneByID($id){

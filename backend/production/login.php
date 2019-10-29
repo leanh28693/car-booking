@@ -52,6 +52,7 @@ if(
                     "address" => $address,
                     "phone" => $phone,
                     "department" => $department,
+                    "user_category" => $user_category,
                     "token" => $token
                 );
                 array_push($users_arr["records"], base64_encode(json_encode($user_item)));

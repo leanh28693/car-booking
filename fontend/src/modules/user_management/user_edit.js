@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import {API_URL} from "../../config/config";
 import axios from "axios";
+import {toast } from 'react-toastify';
 class Useredit extends PureComponent {
     static propTypes = {}
 
@@ -52,6 +53,15 @@ class Useredit extends PureComponent {
     }
     handleSubmit(e){
         e.preventDefault();
+        if(e.target.password_confirmation.value !=  e.target.password.value){
+            toast("password confirm not correct");
+            return false
+        }
+            
+        if(e.target.department.value == '0' || e.target.user_category.value == '0' || e.target.phone.value == ''){
+            toast('please enter Obligatory Row');
+            return false
+        }
         console.log('e',e.target.password.value)
         axios.post(API_URL+'/car_booking/production/user/updateUser.php',{
             id: e.target.id.value,
@@ -128,7 +138,7 @@ class Useredit extends PureComponent {
                                         <div className="row">
                                             <div className="col-xs-6 col-sm-6 col-md-6">
                                                 <div className="form-group">
-                                                    <input type="text" name="phone" id="phone" className="form-control input-sm" onChange={this.handleChange} value={this.state.user[0].phone} placeholder="Phone"/>
+                                                    <input type="text" name="phone" id="phone" className="form-control input-sm" onChange={this.handleChange} value={this.state.user[0].phone} placeholder="Phone (*)"/>
                                                 </div>
                                             </div>
                                             <div className="col-xs-6 col-sm-6 col-md-6">
@@ -155,12 +165,12 @@ class Useredit extends PureComponent {
                                         <div className="row">
                                             <div className="col-xs-6 col-sm-6 col-md-6">
                                                 <div className="form-group">
-                                                    <input type="password" name="password" id="password" className="form-control input-sm" placeholder="Password"/>
+                                                    <input type="password" name="password" id="password" className="form-control input-sm" placeholder="Password (*)"/>
                                                 </div>
                                             </div>
                                             <div className="col-xs-6 col-sm-6 col-md-6">
                                                 <div className="form-group">
-                                                    <input type="password" name="password_confirmation" id="password_confirmation" className="form-control input-sm" placeholder="Confirm Password"/>
+                                                    <input type="password" name="password_confirmation" id="password_confirmation" className="form-control input-sm" placeholder="Confirm Password (*)"/>
                                                 </div>
                                             </div>
                                         </div>

@@ -9,6 +9,7 @@ import { DepartureDel } from "./departure/departure_del";
 import { ArrivalDel } from "./arrival/arrival_del";
 import { NCCDel } from "./NCC/NCC_del";
 import { CarDel } from "./Vehicle/vehicle_del";
+import { PartnerDel } from "./partner/partner_del";
 class AdminControl extends PureComponent {
     static propTypes = {}
 
@@ -21,18 +22,21 @@ class AdminControl extends PureComponent {
             departure_list:[],
             arrival_list:[],
             car_list:[],
-            NCC_list:[]
+            NCC_list:[],
+            partner_list:[]
         }
        this.getDepartment = this.getDepartment.bind(this)
        this.getDeparture = this.getDeparture.bind(this)
        this.getArrival = this.getArrival.bind(this)
        this.getCar = this.getCar.bind(this)
        this.getNCC = this.getNCC.bind(this)
+       this.getPartner = this.getPartner.bind(this)
        this.handleDepartmentDelete = this.handleDepartmentDelete.bind(this)
        this.handleDepartureDelete = this.handleDepartureDelete.bind(this)
        this.handleArrivalDelete = this.handleArrivalDelete.bind(this)
        this.handleCarDelete = this.handleCarDelete.bind(this)
        this.handleNCCDelete = this.handleNCCDelete.bind(this)
+       this.handlePartnerDelete = this.handlePartnerDelete.bind(this)
     }
     componentDidMount(){
         this.getCar()
@@ -84,6 +88,14 @@ class AdminControl extends PureComponent {
             }
         }) 
     }
+    getPartner(){
+        axios.get(API_URL+'/production/Partner/getAll.php').then((data)=>{
+            if(data){
+                this.setState({partner_list:data.data})
+                console.log('Partner',data.data)
+            }
+        }) 
+    }
     handleDepartmentDelete(id){
         console.log('delete id: ',id)
         if(DepartmentDel(id)){
@@ -126,6 +138,16 @@ class AdminControl extends PureComponent {
     handleNCCDelete(id){
         console.log('delete id: ',id)
         if(NCCDel(id)){
+            alert('successfull')
+            this.props.history.replace('/admin-control');
+           }else{
+            alert('error! please contact to Admin')
+           }
+        //NCCDel(id)
+    }
+    handlePartnerDelete(id){
+        console.log('delete id: ',id)
+        if(PartnerDel(id)){
             alert('successfull')
             this.props.history.replace('/admin-control');
            }else{
@@ -257,6 +279,30 @@ class AdminControl extends PureComponent {
                     </tr>
                         
         }):''
+        let partner = (this.state.partner_list != [])?this.state.partner_list.map(row =>{
+            return <tr key={row.id}>
+                        <td>
+                            {row.id}
+                        </td>
+                        <td>
+                            {row.name}
+                        </td>
+                        <td>
+                            {row.date_create}
+                        </td>                            
+                        <td className="td-actions ">
+                        <Link  to={"/partner-edit/"+row.id}>
+                            <button type="button" rel="tooltip" title="Edit Task" className="btn btn-primary btn-link btn-sm">
+                            <i className="material-icons">edit</i>
+                            </button>
+                        </Link>    
+                            <button type="button" rel="tooltip" onClick={()=>this.handlePartnerDelete(row.id)} title="Remove" className="btn btn-danger btn-link btn-sm">
+                            <i className="material-icons">close</i>
+                            </button>
+                        </td>
+                    </tr>
+                        
+        }):''
         return (
             <div className="content">
                 <div className="container-fluid">
@@ -294,7 +340,7 @@ class AdminControl extends PureComponent {
                         className={classnames({ active: this.state.activeTab === '4' })}
                         onClick={() => { this.toggle('4');this.getNCC() }}
                         >
-                        <button className={this.state.activeTab === '4'?"btn btn-success btn-block":"btn btn-primary btn-block"} onclick="md.showNotification('bottom','center')">NCC</button>
+                        <button className={this.state.activeTab === '4'?"btn btn-success btn-block":"btn btn-primary btn-block"} onclick="md.showNotification('bottom','center')">Supplier</button>
                         </NavLink>
                     </NavItem>
                     <NavItem>
@@ -305,7 +351,14 @@ class AdminControl extends PureComponent {
                         <button className={this.state.activeTab === '5'?"btn btn-success btn-block":"btn btn-primary btn-block"} onclick="md.showNotification('bottom','center')">Department</button>
                         </NavLink>
                     </NavItem>
-                    
+                    <NavItem>
+                        <NavLink
+                        className={classnames({ active: this.state.activeTab === '6' })}
+                        onClick={() => {this.toggle('6'); this.getPartner()}}
+                        >
+                        <button className={this.state.activeTab === '6'?"btn btn-success btn-block":"btn btn-primary btn-block"} onclick="md.showNotification('bottom','center')">Partner</button>
+                        </NavLink>
+                    </NavItem>
                     </Nav>
                     <TabContent activeTab={this.state.activeTab}>
                     <TabPane tabId="1">
@@ -342,6 +395,7 @@ class AdminControl extends PureComponent {
                                             Supplier
                                             </th>
                                             <th>
+                                                Date Create
                                             </th>
                                             <th>
                                             Action
@@ -542,6 +596,54 @@ class AdminControl extends PureComponent {
                                         </thead>
                                         <tbody>
                                             {department}
+                                        </tbody>
+                                        </table>
+                                    </div>
+                                    </div>
+                                    </div>
+                        </Col>
+                        </Row>
+                        </div>
+                    </TabPane>
+                    <TabPane tabId="6">
+                    <div className="card">
+                        <div className="card-header card-header-success">
+                                <div className="row">
+                                        <div className="col-10">
+                                            <h4 className="card-title ">Vehicle</h4>
+                                            <p className="card-category">Vehicle list</p>
+                                        </div>
+                                        <div className="col-2">
+                                            <Link  to="/partner-add">
+                                                <button type="button" rel="tooltip" title="add" className="btn btn-primary card-img-right">
+                                                    <i className="material-icons">note_add</i>
+                                                </button>
+                                            </Link>
+                                        </div>
+                                </div>
+                        </div>
+                        <Row>
+                        <Col sm="12">
+                        <div className="card">
+                        <div className="card-body">
+                                    <div className="table-responsive">
+                                        <table className="table">
+                                        <thead className=" text-primary">
+                                            <th>
+                                            ID
+                                            </th>
+                                            <th>
+                                            Name
+                                            </th>
+                                            <th>
+                                            Date Create
+                                            </th>
+                                            <th>
+                                            Action
+                                            </th>
+                                        </thead>
+                                        <tbody>
+                                            {partner}
                                         </tbody>
                                         </table>
                                     </div>

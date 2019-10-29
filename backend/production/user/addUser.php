@@ -38,7 +38,7 @@ if(
     $User->user_category = $data->user_category;
     $User->phone = $data->phone;
     $User->email = $data->email;
-    if($User->readOne($data->username) == false){
+    if($User->readOne($data->username) != false){
         // create the product
         if($User->create()){
     
@@ -59,7 +59,7 @@ if(
             echo json_encode(array("message" => 0));
         }
     }else{
-        echo json_encode(array("message" => 0));
+        echo json_encode(array("message" => 2));
     }
     
 }
