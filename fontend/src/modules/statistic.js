@@ -9,6 +9,7 @@ import {BookingDel} from "../modules/booking/booking_del";
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import Auth from "../components/AuthService";
+import _ from "lodash";
 import base64 from "base-64";
 const auth = new Auth()
 class Statistic extends PureComponent {
@@ -315,7 +316,7 @@ class Statistic extends PureComponent {
                 Cell:props => <span className={props.original.flag == 1? '':'font-weight-bold'}>{props.value}</span>,
                 Footer: (
                     <span className="font-weight-bold">
-                      <strong>Total proceeds: 0</strong>
+                      <strong>Total proceeds: {_.sum(_.map(data, d => parseFloat(d.proceeds_usd)))}</strong>
                     </span>
                 )          
             },
