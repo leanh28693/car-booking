@@ -62,10 +62,13 @@ function getOneByID($id){
     $stmt->execute();
     return $stmt;
 }
-function getlistByMonth($fromday,$today){
+function getlistByMonth($userid,$fromday,$today){
     // select all query
-    $query = "SELECT * FROM ".$this->table_name." WHERE date >= ".$fromday." and date <=".$today."" ;
-    //echo $query;die;
+    if($userid == 0)
+        $query = "SELECT * FROM ".$this->table_name." WHERE date >= ".$fromday." and date <=".$today."" ;
+    else
+        $query = "SELECT * FROM ".$this->table_name." WHERE user_id =".$userid." and date >= ".$fromday." and date <=".$today."" ;
+        //echo $query;die;
     // prepare query statement
     $stmt = $this->conn->prepare($query);
     // execute query

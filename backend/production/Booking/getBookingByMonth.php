@@ -25,7 +25,7 @@ $data = json_decode(file_get_contents("php://input"));
 // make sure data is not empty
 // query products
 if($data->fromday != null && $data->today != null){
-    $stmt = $Booking->getlistByMonth($data->fromday,$data->today);
+    $stmt = $Booking->getlistByMonth($data->userID, $data->fromday, $data->today);
     $num = $stmt->rowCount();
     // check if more than 0 record found
     if($num>0){
@@ -75,6 +75,9 @@ if($data->fromday != null && $data->today != null){
         // show products data in json format
         echo json_encode($Bookings_arr["records"]);
     }
+    http_response_code(200);
+        // show products data in json format
+    echo '';
 }
 
  
